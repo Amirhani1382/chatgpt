@@ -10,7 +10,7 @@ stage.
 python pingpong_tournament.py [OPTIONS] player1 player2 ...
 ```
 
-Players should be listed in seeding order. Use `--groups` to set the number of
+Players must be listed in seeding order. Use `--groups` to set the number of
 groups and `--advance` for the number of players that advance from each group.
 The program will prompt for match results during execution.
 

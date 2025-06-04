@@ -17,6 +17,10 @@ class Player:
     group: Optional[str] = None
     id: Optional[int] = None
 
+    def __hash__(self):
+        """Allow players to be dictionary keys using their name and seed."""
+        return hash((self.name, self.seed))
+
 
 @dataclass
 class MatchResult:
@@ -87,12 +91,15 @@ class KnockoutBracket:
         while size < len(players):
             size *= 2
         bracket_players = players + [None] * (size - len(players))
-        matches = [KnockoutMatch(bracket_players[i], bracket_players[i+1])
-                   for i in range(0, size, 2)]
-        rounds = [matches]
-        while size > 1:
-            size //= 2
-            matches = [KnockoutMatch(None, None) for _ in range(size//2)]
+
+        first_round = [
+            KnockoutMatch(bracket_players[i], bracket_players[i + 1])
+            for i in range(0, size, 2)
+        ]
+        rounds = [first_round]
+        matches = first_round
+        while len(matches) > 1:
+            matches = [KnockoutMatch(None, None) for _ in range(len(matches) // 2)]
             rounds.append(matches)
         return cls(rounds)
 
@@ -140,10 +147,14 @@ class Tournament:
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Ping Pong Tournament Manager")
-    parser.add_argument('players', nargs='+', help='List of player names in seeding order')
+    parser.add_argument('players', nargs='*', help='List of player names in seeding order')
     parser.add_argument('--groups', type=int, default=4, help='Number of groups')
     parser.add_argument('--advance', type=int, default=2, help='Number advancing from each group')
     args = parser.parse_args()
+    if not args.players:
+        parser.print_usage()
+        print("error: the following arguments are required: players")
+        raise SystemExit(1)
 
     players = [Player(name, seed=i+1) for i, name in enumerate(args.players)]
     t = Tournament(players, group_count=args.groups, advance_per_group=args.advance)
@@ -170,7 +181,11 @@ if __name__ == "__main__":
         print(p.name)
     bracket = t.create_bracket(advancing)
     # display round names
-    round_names = ["Round of {}".format(len(r)*2) for r in bracket.rounds]
+    size = len(bracket.rounds[0]) * 2
+    round_names = []
+    for _ in bracket.rounds:
+        round_names.append(f"Round of {size}")
+        size //= 2
     for rnd, name in enumerate(round_names):
         print(f"\n{name}")
         for idx, match in enumerate(bracket.rounds[rnd]):
