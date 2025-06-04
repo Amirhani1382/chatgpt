@@ -57,10 +57,12 @@ class Group:
     name: str
     players: List[Player]
     matches: List[MatchResult] = field(default_factory=list)
+    schedule: List[Tuple[Player, Player]] = field(default_factory=list)
 
     def schedule_matches(self) -> List[Tuple[Player, Player]]:
-        combos = list(itertools.combinations(self.players, 2))
-        return combos
+        """Generate and store all match pairings for this group."""
+        self.schedule = list(itertools.combinations(self.players, 2))
+        return self.schedule
 
     def record_result(self, p1: Player, p2: Player, scores: List[Tuple[int, int]]):
         self.matches.append(MatchResult(p1, p2, scores))
@@ -75,11 +77,19 @@ class Group:
         standings = sorted(points.items(), key=lambda x: (-x[1], x[0].seed))
         return [(p, pts, i) for i, (p, pts) in enumerate(standings, 1)]
 
+    def is_complete(self) -> bool:
+        """Return True if all scheduled matches have results."""
+        return len(self.matches) == len(self.schedule)
+
 @dataclass
 class KnockoutMatch:
     player1: Optional[Player]
     player2: Optional[Player]
     result: Optional[MatchResult] = None
+
+    @property
+    def is_ready(self) -> bool:
+        return self.player1 is not None and self.player2 is not None
 
 @dataclass
 class KnockoutBracket:
@@ -113,6 +123,16 @@ class KnockoutBracket:
                 next_match.player1 = winner
             else:
                 next_match.player2 = winner
+
+    def champion(self) -> Optional[Player]:
+        final = self.rounds[-1][0]
+        if final.result:
+            return final.result.winner
+        if final.player1 and not final.player2:
+            return final.player1
+        if final.player2 and not final.player1:
+            return final.player2
+        return None
 
 class Tournament:
     def __init__(self, players: List[Player], group_count: int = 4, advance_per_group: int = 2):
