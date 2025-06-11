@@ -21,3 +21,13 @@ python pingpong_tournament.py --groups 2 --advance 2 Alice Bob Charlie Dave
 ```
 
 The script then asks for results of each match and prints the champion.
+
+## Open Trackin Website
+
+To open [trackin.post.ir](https://trackin.post.ir) in Google Chrome, run:
+
+```
+python open_trackin_chrome.py
+```
+
+The script attempts to use Chrome if installed; otherwise it falls back to your default browser.
