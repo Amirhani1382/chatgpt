@@ -31,3 +31,18 @@ python open_trackin_chrome.py
 ```
 
 The script attempts to use Chrome if installed; otherwise it falls back to your default browser.
+
+## Postal Tracking Web App Scaffold
+
+Use `scaffold_post_tracking_app.py` to generate a starter project for a
+modular Flask application that tracks Iranian postal codes. The script creates
+directories for the backend, templates and static assets and fills them with
+documented boilerplate code.
+
+```
+python scaffold_post_tracking_app.py /path/to/new/project
+```
+
+The target directory must be empty. After running the command you can navigate
+into the generated folder, install dependencies and start implementing the
+remaining features.
